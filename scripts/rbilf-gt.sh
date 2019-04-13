@@ -7,6 +7,7 @@ LFR=$3 # last frame
 SIG=$4 # noise standard dev.
 OUT=$5 # output folder
 PRM="${6}" # denoiser parameters
+OPM=${7:-"1 0.40 0.75 1 0.40 0.75"} # optical flow parameters
 
 #mkdir -p $OUT/s$SIG
 #OUT=$OUT/s$SIG
@@ -39,6 +40,9 @@ done
 
 # compute optical flow {{{1
 TVL1="$DIR/tvl1flow"
+
+read -ra O <<< "$OPM"
+FSCALE=${O[0]}; DW=${O[1]}; NPROC=0
 for i in $(seq $((FFR+1)) $LFR);
 do
 	file=$(printf $OUT"/%04d_b.flo" $i)
@@ -47,7 +51,7 @@ do
 		$TVL1 $(printf $OUT"/n%04d.tif" $i) \
 				$(printf $OUT"/n%04d.tif" $((i-1))) \
 				$file \
-				0 0.25 0.2 0.3 100 0.5 5 0.01 0; 
+				$NPROC 0.25 0.2 $DW 100 $FSCALE 0.5 5 0.01 0; 
 	fi
 done
 cp $(printf $OUT"/%04d_b.flo" $((FFR+1))) $(printf $OUT"/%04d_b.flo" $FFR)
