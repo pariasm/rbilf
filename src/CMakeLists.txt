@@ -13,7 +13,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${ARGPARSE_INCLUDE_DIR})
 include_directories(${IIO_INCLUDE_DIR})
 
-add_executable(rbilf main.c)
+add_executable(rbilf main.c rbilf.c)
 
 link_directories(${CMAKE_BINARY_DIR}/lib)
 target_link_libraries(rbilf iio argparse)

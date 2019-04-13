@@ -52,43 +52,6 @@ do
 done
 cp $(printf $OUT"/%04d_b.flo" $((FFR+1))) $(printf $OUT"/%04d_b.flo" $FFR)
 
-# # downsample for optical flow {{{1
-# for i in $(seq $FFR $LFR);
-# do
-# 	filein=$(printf $OUT/"%04d.tif" $i)
-# 	file=$(printf $OUT/"h%04d.tif" $i)
-# 	if [ ! -f $file ]
-# 	then
-# 		blur gauss 1.39 $filein | downsa f 2 - $file
-# 	fi
-# done
-# 
-# # compute optical flow {{{1
-# TVL1="/home/pariasm/Work/optical_flow/algos/tvl1flow_3/tvl1flow"
-# for i in $(seq $((FFR+1)) $LFR);
-# do
-# 	file=$(printf $OUT"/h%04d_b.flo" $i)
-# 	if [ ! -f $file ]
-# 	then
-# 		$TVL1 $(printf $OUT"/h%04d.tif" $i) \
-# 				$(printf $OUT"/h%04d.tif" $((i-1))) \
-# 				$file \
-# 				0 0.25 0.2 0.3 100 0.5 5 0.01 0; 
-# 	fi
-# done
-# cp $(printf $OUT"/h%04d_b.flo" $((FFR+1))) $(printf $OUT"/h%04d_b.flo" $FFR)
-# 
-# # upscale optical flow {{{1
-# for i in $(seq $FFR $LFR);
-# do
-# 	filein=$(printf $OUT/"h%04d_b.flo" $i)
-# 	file=$(printf $OUT/"%04d_b.flo" $i)
-# 	if [ ! -f $file ]
-# 	then
-# 		plambda $filein "2 x *" | upsa 2 2 - $file
-# 	fi
-# done
-
 # run denoising {{{1
 echo \
 $DIR/rbilf \
