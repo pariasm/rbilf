@@ -1,74 +1,9 @@
 #include "argparse.h"   // command line parser
 #include "iio.h"        // image i/o
-
 #include <assert.h>     // assert
 #include <stdlib.h>     // NULL, EXIT_SUCCESS/FAILURE
 #include <stdio.h>      // printf, fprintf, stderr
 #include "rbilf.h"
-
-// read/write image sequence [[[1
-static
-float * vio_read_video_float_vec(const char * const path, int first, int last, 
-		int *w, int *h, int *pd)
-{
-	// retrieve size from first frame and allocate memory for video
-	int frames = last - first + 1;
-	int whc;
-	float *vid = NULL;
-	{
-		char frame_name[512];
-		sprintf(frame_name, path, first);
-		float *im = iio_read_image_float_vec(frame_name, w, h, pd);
-
-		// size of a frame
-		whc = *w**h**pd;
-
-		vid = malloc(frames*whc*sizeof(float));
-		memcpy(vid, im, whc*sizeof(float));
-		if(im) free(im);
-	}
-
-	// load video
-	for (int f = first + 1; f <= last; ++f)
-	{
-		int w1, h1, c1;
-		char frame_name[512];
-		sprintf(frame_name, path, f);
-		float *im = iio_read_image_float_vec(frame_name, &w1, &h1, &c1);
-
-		// check size
-		if (whc != w1*h1*c1)
-		{
-			fprintf(stderr, "Size missmatch when reading frame %d\n", f);
-			if (im)  free(im);
-			if (vid) free(vid);
-			return NULL;
-		}
-
-		// copy to video buffer
-		memcpy(vid + (f - first)*whc, im, whc*sizeof(float));
-		if(im) free(im);
-	}
-
-	return vid;
-}
-
-static
-void vio_save_video_float_vec(const char * const path, float * vid, 
-		int first, int last, int w, int h, int c)
-{
-	const int whc = w*h*c;
-	for (int f = first; f <= last; ++f)
-	{
-		char frame_name[512];
-		sprintf(frame_name, path, f);
-		float * im = vid + (f - first)*whc;
-		iio_save_image_float_vec(frame_name, im, w, h, c);
-	}
-}
-
-
-// main funcion [[[1
 
 // 'usage' message in the command line
 static const char *const usages[] = {
@@ -82,13 +17,15 @@ int main(int argc, const char *argv[])
 	// parse command line [[[2
 
 	// command line parameters and their defaults
-	const char *nisy_path = NULL;
-	const char *deno_path = NULL;
-	const char *flow_path = NULL;
-	int fframe = 0, lframe = -1;
+	const char *nisy1_path = NULL;
+	const char *deno0_path = NULL;
+	const char *deno1_path = NULL;
+	const char *bflow_path = NULL;
 	float sigma = 0.f;
 	bool verbose = false;
+	int verbose_int = 0;
 	struct rbilf_params prms;
+
 	prms.search_sz    = -1;
 	prms.weights_hx   = -1.; // -1 means automatic value
 	prms.weights_hd   = -1.;
@@ -101,11 +38,10 @@ int main(int argc, const char *argv[])
 	struct argparse_option options[] = {
 		OPT_HELP(),
 		OPT_GROUP("Algorithm options"),
-		OPT_STRING ('i', "nisy"   , &nisy_path, "noisy input path (printf format)"),
-		OPT_STRING ('o', "flow"   , &flow_path, "backward flow path (printf format)"),
-		OPT_STRING ('d', "deno"   , &deno_path, "denoised output path (printf format)"),
-		OPT_INTEGER('f', "first"  , &fframe, "first frame"),
-		OPT_INTEGER('l', "last"   , &lframe , "last frame"),
+		OPT_STRING ('i', "nisy"   , &nisy1_path, "noisy input path"),
+		OPT_STRING ('o', "flow"   , &bflow_path, "backward flow path"),
+		OPT_STRING ( 0 , "den0"   , &deno0_path, "previous denoised frame path"),
+		OPT_STRING ( 0 , "den1"   , &deno1_path, "denoised output frame path"),
 		OPT_FLOAT  ('s', "sigma"  , &sigma, "noise standard dev"),
 		OPT_INTEGER('w', "search" , &prms.search_sz, "search region radius"),
 		OPT_FLOAT  ( 0 , "whx"    , &prms.weights_hx, "spatial pixel sim. weights param"),
@@ -115,7 +51,7 @@ int main(int argc, const char *argv[])
 		OPT_FLOAT  ( 0 , "lambdax", &prms.lambda_x, "noisy pixel weight in spatial pixel distance"),
 		OPT_FLOAT  ( 0 , "lambdat", &prms.lambda_t, "noisy pixel weight in temporal pixel distance"),
 		OPT_GROUP("Program options"),
-		OPT_BOOLEAN('v', "verbose", &verbose, "verbose output"),
+		OPT_INTEGER('v', "verbose", &verbose_int, "verbose output"),
 		OPT_END(),
 	};
 
@@ -125,12 +61,19 @@ int main(int argc, const char *argv[])
 	argparse_describe(&argparse, "\nVideo denoiser based on recursive bilateral filter.", "");
 	argc = argparse_parse(&argparse, argc, argv);
 
+	verbose = verbose_int;
+
 	// default value for noise-dependent params
 	rbilf_default_params(&prms, sigma);
 
 	// print parameters
 	if (verbose)
 	{
+		printf("data i/o:\n");
+		printf("\tnoisy frame:           %s\n", nisy1_path);
+		printf("\toptical flow:          %s\n", bflow_path);
+		printf("\tprev denoised frame:   %s\n", deno0_path);
+		printf("\toutput denoised frame: %s\n", deno1_path);
 		printf("parameters:\n");
 		printf("\tnoise  %f\n", sigma);
 		printf("\tsearch    %d\n", prms.search_sz);
@@ -144,75 +87,79 @@ int main(int argc, const char *argv[])
 	}
 
 	// load data [[[2
-	if (verbose) printf("loading video %s\n", nisy_path);
-	int w, h, c; //, frames = lframe - fframe + 1;
-	float * nisy = vio_read_video_float_vec(nisy_path, fframe, lframe, &w, &h, &c);
-	{
-		if (!nisy)
-			return EXIT_FAILURE;
-	}
+	int w, h, c;
+	float * nisy1 = iio_read_image_float_vec(nisy1_path, &w, &h, &c);
+	if (!nisy1)
+		return fprintf(stderr, "Error while openning noisy frame\n"),
+				 EXIT_FAILURE;
 
 	// load optical flow
-	float * flow = NULL;
-	if (flow_path)
+	float * bflow = NULL;
+	if (bflow_path)
 	{
-		if (verbose) printf("loading flow %s\n", flow_path);
 		int w1, h1, c1;
-		flow = vio_read_video_float_vec(flow_path, fframe, lframe, &w1, &h1, &c1);
+		bflow = iio_read_image_float_vec(bflow_path, &w1, &h1, &c1);
 
-		if (!flow)
+		if (!bflow)
 		{
-			if (nisy) free(nisy);
+			if (nisy1) free(nisy1);
+			fprintf(stderr, "Error while openning bwd optical flow\n");
 			return EXIT_FAILURE;
 		}
 
 		if (w*h != w1*h1 || c1 != 2)
 		{
 			fprintf(stderr, "Video and optical flow size missmatch\n");
-			if (nisy) free(nisy);
-			if (flow) free(flow);
+			if (nisy1) free(nisy1);
+			if (bflow) free(bflow);
 			return EXIT_FAILURE;
 		}
 	}
 
-	// run denoiser [[[2
-	const int whc = w*h*c, wh2 = w*h*2;
-	float * deno = nisy;
-	float * warp0 = malloc(whc*sizeof(float));
-	float * deno1 = malloc(whc*sizeof(float));
-	for (int f = fframe; f <= lframe; ++f)
+	// load filter 1 output from previous frame
+	float * deno0 = NULL;
+	if (deno0_path)
 	{
-		if (verbose) printf("processing frame %d\n", f);
+		int w1, h1, c1;
+		deno0 = iio_read_image_float_vec(deno0_path, &w1, &h1, &c1);
 
-		// warp previous denoised frame
-		if (f > fframe)
+		if (!deno0)
+			fprintf(stderr, "Warning: previous denoised frame not found\n");
+
+		if (deno0 && w*h*c != w1*h1*c1)
 		{
-			float * deno0 = deno + (f - 1 - fframe)*whc;
-			if (flow)
-			{
-				float * flow0 = flow + (f - 0 - fframe)*wh2;
-				warp_bicubic_inplace(warp0, deno0, flow0, w, h, c);
-			}
-			else
-				// copy without warping
-				memcpy(warp0, deno0, whc*sizeof(float));
+			fprintf(stderr, "Previous denoised output size missmatch\n");
+			if (nisy1) free(nisy1);
+			if (bflow) free(bflow);
+			if (deno0) free(deno0);
+			return EXIT_FAILURE;
 		}
-
-		// run denoising
-		float *nisy1 = nisy + (f - fframe)*whc;
-		float *deno0 = (f > fframe) ? warp0 : NULL;
-		rbilateral_filter_frame(deno1, nisy1, deno0, w, h, c, sigma, prms, f);
-
-		memcpy(nisy1, deno1, whc*sizeof(float));
 	}
 
+
+	// run denoiser [[[2
+	const int whc = w*h*c, wh2 = w*h*2;
+	float * warp0 = malloc(whc*sizeof(float));
+
+	// warp previous denoised frame
+	if (deno0 && bflow)
+	{
+		warp_bicubic_inplace(warp0, deno0, bflow, w, h, c);
+		float *tmp = deno0; deno0 = warp0; warp0 = tmp; // swap warp0-deno0
+	}
+
+	// run denoising
+	float * deno1 = malloc(whc*sizeof(float));
+	rbilateral_filter_frame(deno1, nisy1, deno0, w, h, c, sigma, prms, 0);
+
 	// save output [[[2
-	vio_save_video_float_vec(deno_path, deno, fframe, lframe, w, h, c);
+	iio_save_image_float_vec(deno1_path, deno1, w, h, c);
 
 	if (deno1) free(deno1);
+	if (deno0) free(deno0);
 	if (warp0) free(warp0);
-	if (nisy) free(nisy);
-	if (flow) free(flow);
+	if (nisy1) free(nisy1);
+	if (bflow) free(bflow);
 
 	return EXIT_SUCCESS; // ]]]2
 }
