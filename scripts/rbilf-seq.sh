@@ -6,8 +6,9 @@ FFR=$2 # first frame
 LFR=$3 # last frame
 SIG=$4 # noise standard dev.
 OUT=$5 # output folder
-FPM=${6:-""} # filtering parameters
-OPM=${7:-"1 0.40 0.75 1 0.40 0.75"} # optical flow parameters
+PM1=$6 # filtering parameters iteration 1
+PM2=$7 # filtering parameters iteration 2
+OPM=${8:-"1 0.40"} # optical flow parameters
 
 mkdir -p $OUT
 
@@ -26,11 +27,14 @@ do
 done
 
 # filter first frame {{{1
-DEN="$OUT/deno-%03d.tif"
+DEN1="$OUT/den1-%03d.tif"
+DEN2="$OUT/den2-%03d.tif"
 
 i=$FFR
 NLK="$DIR/rbilf"
-$NLK -i $(printf $SEQ $i) -s $SIG $FPM --den1 $(printf $DEN $i) 
+$NLK -i $(printf $SEQ $i) -s $SIG $PM1 --den1 $(printf $DEN1 $i) 
+$NLK -i $(printf $SEQ $i) -s $SIG $PM2 --gui1 $(printf $DEN1 $i) \
+                                       --den1 $(printf $DEN2 $i) 
 
 # filter rest of sequence {{{1
 TVL1="$DIR/tvl1flow"
@@ -47,14 +51,18 @@ do
 	file=$(printf $FLOW $i)
 	if [ ! -f $file ]; then
 		$TVL1 $(printf $SEQ $i) \
-		      $(printf $DEN $((i-1))) \
+		      $(printf $DEN2 $((i-1))) \
 		      $file \
 		      $NPROC 0.25 0.2 $DW 100 $FSCALE 0.5 5 0.01 0;
 	fi
 
 	# run filtering {{{2
-	$NLK -i $(printf $SEQ $i) -s $SIG $FPM -o $(printf $FLOW $i) \
-	 --den0 $(printf $DEN $((i-1))) --den1 $(printf $DEN $i)
+	$NLK -i $(printf $SEQ $i) -s $SIG $PM1 -o $(printf $FLOW $i) \
+	 --den0 $(printf $DEN2 $((i-1))) --den1 $(printf $DEN1 $i)
+
+	$NLK -i $(printf $SEQ $i) -s $SIG $PM2 -o $(printf $FLOW $i) \
+	 --den0 $(printf $DEN2 $((i-1))) --gui1 $(printf $DEN1 $i) \
+	 --den1 $(printf $DEN2 $i)
 
 done
 

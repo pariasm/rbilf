@@ -20,6 +20,7 @@ int main(int argc, const char *argv[])
 	const char *nisy1_path = NULL;
 	const char *deno0_path = NULL;
 	const char *deno1_path = NULL;
+	const char *guid1_path = NULL;
 	const char *bflow_path = NULL;
 	float sigma = 0.f;
 	bool verbose = false;
@@ -42,6 +43,7 @@ int main(int argc, const char *argv[])
 		OPT_STRING ('o', "flow"   , &bflow_path, "backward flow path"),
 		OPT_STRING ( 0 , "den0"   , &deno0_path, "previous denoised frame path"),
 		OPT_STRING ( 0 , "den1"   , &deno1_path, "denoised output frame path"),
+		OPT_STRING ( 0 , "gui1"   , &guid1_path, "guide frame path"),
 		OPT_FLOAT  ('s', "sigma"  , &sigma, "noise standard dev"),
 		OPT_INTEGER('w', "search" , &prms.search_sz, "search region radius"),
 		OPT_FLOAT  ( 0 , "whx"    , &prms.weights_hx, "spatial pixel sim. weights param"),
@@ -71,6 +73,7 @@ int main(int argc, const char *argv[])
 	{
 		printf("data i/o:\n");
 		printf("\tnoisy frame:           %s\n", nisy1_path);
+		printf("\tguide frame:           %s\n", guid1_path);
 		printf("\toptical flow:          %s\n", bflow_path);
 		printf("\tprev denoised frame:   %s\n", deno0_path);
 		printf("\toutput denoised frame: %s\n", deno1_path);
@@ -116,7 +119,7 @@ int main(int argc, const char *argv[])
 		}
 	}
 
-	// load filter 1 output from previous frame
+	// load filter output from previous frame
 	float * deno0 = NULL;
 	if (deno0_path)
 	{
@@ -136,6 +139,27 @@ int main(int argc, const char *argv[])
 		}
 	}
 
+	// load guide for previous frame
+	float * guid1 = NULL;
+	if (guid1_path)
+	{
+		int w1, h1, c1;
+		guid1 = iio_read_image_float_vec(guid1_path, &w1, &h1, &c1);
+
+		if (!guid1)
+			fprintf(stderr, "Warning: guide frame not found\n");
+
+		if (guid1 && w*h*c != w1*h1*c1)
+		{
+			fprintf(stderr, "Previous denoised output size missmatch\n");
+			if (nisy1) free(nisy1);
+			if (bflow) free(bflow);
+			if (deno0) free(deno0);
+			if (guid1) free(guid1);
+			return EXIT_FAILURE;
+		}
+	}
+
 
 	// run denoiser [[[2
 	const int whc = w*h*c, wh2 = w*h*2;
@@ -150,12 +174,13 @@ int main(int argc, const char *argv[])
 
 	// run denoising
 	float * deno1 = malloc(whc*sizeof(float));
-	rbilateral_filter_frame(deno1, nisy1, deno0, w, h, c, sigma, prms, 0);
+	rbilateral_filter_frame(deno1, nisy1, guid1, deno0, w, h, c, sigma, prms, 0);
 
 	// save output [[[2
 	iio_save_image_float_vec(deno1_path, deno1, w, h, c);
 
 	if (deno1) free(deno1);
+	if (guid1) free(guid1);
 	if (deno0) free(deno0);
 	if (warp0) free(warp0);
 	if (nisy1) free(nisy1);

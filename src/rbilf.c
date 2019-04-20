@@ -92,7 +92,7 @@ void rbilf_default_params(struct rbilf_params * p, float sigma)
 }
 
 // recursive bilateral filter for frame t [[[1
-void rbilateral_filter_frame(float *deno1, float *nisy1, float *deno0,
+void rbilateral_filter_frame(float *deno1, float *nisy1, float* guid1, float *deno0,
 		int w, int h, int ch, float sigma,
 		const struct rbilf_params prms, int frame)
 {
@@ -109,6 +109,7 @@ void rbilateral_filter_frame(float *deno1, float *nisy1, float *deno0,
 	float (*d1)[w][ch] = (void *)deno1;       // denoised frame t (output)
 	const float (*d0)[w][ch] = (void *)deno0; // denoised frame t-1
 	const float (*n1)[w][ch] = (void *)nisy1; // noisy frame at t
+	const float (*g1)[w][ch] = (void *)(guid1 ? guid1 : nisy1); // guide frame at t
 
 	// loop on image pixels [[[2
 	#pragma omp parallel for
@@ -134,15 +135,15 @@ void rbilateral_filter_frame(float *deno1, float *nisy1, float *deno0,
 					// use noisy and denoised patches from previous frame
 					for (int c = 0; c < ch ; ++c)
 					{
-						const float eN1 = n1[qy][qx][c] - n1[py][px][c];
+						const float eN1 = g1[qy][qx][c] - g1[py][px][c];
 						const float eD0 = d0[qy][qx][c] - d0[py][px][c];
 						alpha += l * eN1 * eN1 + (1 - l) * eD0 * eD0;
 					}
 				else
-					// use only noisy from previous frame
+					// use only noisy from current frame
 					for (int c = 0; c < ch ; ++c)
 					{
-						const float eN1 = n1[qy][qx][c] - n1[py][px][c];
+						const float eN1 = g1[qy][qx][c] - g1[py][px][c];
 						alpha += eN1 * eN1;
 					}
 
@@ -195,7 +196,7 @@ void rbilateral_filter_frame(float *deno1, float *nisy1, float *deno0,
 			for (int c = 0; c < ch; ++c)
 			{
 				const float eD = d1[py][px][c] - d0[py][px][c];
-				const float eN = n1[py][px][c] - d0[py][px][c];
+				const float eN = g1[py][px][c] - d0[py][px][c];
 				beta += l01 * fmax(eN * eN - sigma2, 0.f) + (1 - l01) * eD * eD;
 			}
 

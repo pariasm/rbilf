@@ -18,7 +18,7 @@ struct rbilf_params
 void rbilf_default_params(struct rbilf_params * p, float sigma);
 
 // recursive bilateral filter for frame t [[[1
-void rbilateral_filter_frame(float *deno1, float *nisy1, float *deno0,
+void rbilateral_filter_frame(float *deno1, float *nisy1, float *guid1, float *deno0,
 		int w, int h, int ch, float sigma,
 		const struct rbilf_params prms, int frame);
 
