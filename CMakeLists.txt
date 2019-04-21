@@ -24,11 +24,15 @@ if(OPENMP_FOUND)
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 
+
+
+
 # add project directories #####################################################
 
 add_subdirectory(lib/iio)      # image i/o
 add_subdirectory(lib/tvl1flow) # tvl1 optical flow
 add_subdirectory(lib/argparse) # command line parsing
+add_subdirectory(lib/multiscale) # multiscaler
 add_subdirectory(src)
 add_subdirectory(scripts)
 
