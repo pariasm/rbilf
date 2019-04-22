@@ -1,7 +1,8 @@
 % optimize parameters of denoising algorithm using octave sqp
 
 x0 = [80; 1.4]; % starting point
-x0 = [80; 1.4; 40; 0.8; 0.7]; % starting point
+x0 = [77.63528; 0.92287; 10.07817; 2.59343; 0.0]; % optimum grayscale sigma 10
+x0 = [83.06599; 0.91307; 27.19039; 3.49502; 0.0]; % optimum grayscale sigma 20
 
 global computing_gradient = 0;
 

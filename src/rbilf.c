@@ -53,23 +53,29 @@ void bicubic_interpolation_nans(float *result,
 	}
 }
 
-void warp_bicubic_inplace(float *imw, float *im, float *of, int w, int h, int ch)
+void warp_bicubic(float *imw, float *im, float *of, float *msk,
+		int w, int h, int ch)
 {
 	// warp previous frame
 	for (int y = 0; y < h; ++y)
 	for (int x = 0; x < w; ++x)
+	if (!msk || (msk &&  msk[x + y*w] == 0))
 	{
 		float xw = x + of[(x + y*w)*2 + 0];
 		float yw = y + of[(x + y*w)*2 + 1];
 		bicubic_interpolation_nans(imw + (x + y*w)*ch, im, w, h, ch, xw, yw);
 	}
+	else
+		for (int c = 0; c < ch; ++c)
+			imw[(x + y*w)*ch + c] = NAN;
+
 	return;
 }
 
 // recursive nl-means parameters [[[1
 
 // set default parameters as a function of sigma
-void rbilf_default_params(struct rbilf_params * p, float sigma)
+void rbilf_default_params(struct rbilf_params * p, float sigma, int step)
 {
 	// the parameters are based on the following parameters
 	// found with a parameter search:
@@ -78,14 +84,32 @@ void rbilf_default_params(struct rbilf_params * p, float sigma)
 	// sigma 10:  10 10.2 4    7.5 0  0.5  0.1 
 	// sigma 20:  10 24.4 1.6 14.1 0  0.3  0.1
 	// sigma 40:  10 48.0 1.6 27.1 0  0.6  0.02
-	if (p->weights_hx   < 0) p->weights_hx   = 1.2 * sigma;
-	if (p->weights_hd   < 0) p->weights_hd   = 1.6;
-	if (p->search_sz    < 0) p->search_sz    = 3*p->weights_hd;
-	if (p->weights_thx  < 0) p->weights_thx  = .05f;
-	if (p->weights_ht   < 0) p->weights_ht   = 0.7 * sigma;
-	if (p->lambda_t     < 0) p->lambda_t    = 0.5;
-	if (p->lambda_x < 0)
-		p->lambda_x = fmax(0, fmin(0.2, 0.1 - (sigma - 20)/400));
+	if (step == 1)
+	{
+		if (p->weights_hx0  < 0) p->weights_hx0  = 1.07f * sigma + 66.9;
+		if (p->weights_hd0  < 0) p->weights_hd0  = 0.92;
+		if (p->weights_hx   < 0) p->weights_hx   = 1.2 * sigma;
+		if (p->weights_hd   < 0) p->weights_hd   = 1.6;
+		if (p->search_sz    < 0) p->search_sz    = 3*p->weights_hd;
+		if (p->weights_thx  < 0) p->weights_thx  = .05f;
+		if (p->weights_ht   < 0) p->weights_ht   = 0.7 * sigma;
+		if (p->lambda_t     < 0) p->lambda_t    = 0.5;
+		if (p->lambda_x < 0)
+			p->lambda_x = fmax(0, fmin(0.2, 0.1 - (sigma - 20)/400));
+	}
+	else
+	{
+		if (p->weights_hx0  < 0) p->weights_hx0  = 1.71 * sigma - 7.0;
+		if (p->weights_hd0  < 0) p->weights_hd0  = 0.09 * sigma + 1.7;
+		if (p->weights_hx   < 0) p->weights_hx   = 1.2 * sigma;
+		if (p->weights_hd   < 0) p->weights_hd   = 1.6;
+		if (p->search_sz    < 0) p->search_sz    = 3*p->weights_hd;
+		if (p->weights_thx  < 0) p->weights_thx  = .05f;
+		if (p->weights_ht   < 0) p->weights_ht   = 0.7 * sigma;
+		if (p->lambda_t     < 0) p->lambda_t    = 0.5;
+		if (p->lambda_x < 0)
+			p->lambda_x = fmax(0, fmin(0.2, 0.1 - (sigma - 20)/400));
+	}
 
 	// limit search region to prevent too long running times
 	p->search_sz = fmin(15, fmin(3*p->weights_hd, p->search_sz));
@@ -97,9 +121,7 @@ void rbilateral_filter_frame(float *deno1, float *nisy1, float* guid1, float *de
 		const struct rbilf_params prms, int frame)
 {
 	// definitions [[[2
-	const float weights_hx2  = prms.weights_hx * prms.weights_hx;
-	const float weights_hd2  = prms.weights_hd * prms.weights_hd * 2;
-	const float weights_ht2  = prms.weights_ht * prms.weights_ht;
+	const float weights_ht2 = prms.weights_ht * prms.weights_ht;
 	const float sigma2 = sigma * sigma;
 
 	// set output and aggregation weights to 0
@@ -116,6 +138,21 @@ void rbilateral_filter_frame(float *deno1, float *nisy1, float* guid1, float *de
 	for (int py = 0; py < h; ++py)
 	for (int px = 0; px < w; ++px)
 	{
+		// determine which parameters to use for spatial averaging
+		float weights_hx2, weights_hd2;
+		if (d0 && !isnan(d0[py][px][0]))
+		{
+			// params for spatio-temporal bilateral filter
+			weights_hx2 = prms.weights_hx * prms.weights_hx;
+			weights_hd2 = prms.weights_hd * prms.weights_hd * 2;
+		}
+		else
+		{
+			// params for spatial bilateral filter
+			weights_hx2 = prms.weights_hx0 * prms.weights_hx0;
+			weights_hd2 = prms.weights_hd0 * prms.weights_hd0 * 2;
+		}
+
 		// spatial average: loop on search region [[[3
 		float D1[ch]; // denoised pixel at p in frame t
 		for (int c = 0; c < ch ; ++c)	D1[c] = 0;
@@ -148,10 +185,7 @@ void rbilateral_filter_frame(float *deno1, float *nisy1, float* guid1, float *de
 					}
 
 				// compute spatial similarity weight ]]]4[[[4
-				if (weights_hx2)
-					alpha = expf(-1 / weights_hx2 * alpha / (float)(ch));
-				else
-					alpha = (qx == px && qy == py) ? 1. : 0.;
+				alpha = expf(-1 / weights_hx2 * alpha / (float)(ch));
 
 				if (weights_hd2 < FLT_HUGE)
 				{

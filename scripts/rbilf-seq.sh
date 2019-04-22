@@ -48,6 +48,7 @@ TVL1="$DIR/tvl1flow"
 read -ra O <<< "$OPM"
 FSCALE=${O[0]}; DW=${O[1]}; NPROC=2
 FLOW="$OUT/bflo-%03d.flo"
+OCCL="$OUT/bocc-%03d.png"
 
 for i in $(seq $((FFR+1)) $LFR);
 do
@@ -61,12 +62,20 @@ do
 		      $NPROC 0.25 0.2 $DW 100 $FSCALE 0.5 5 0.01 0;
 	fi
 
+	# backward occlusion masks {{{2
+	file=$(printf $OCCL $i)
+	if [ ! -f $file ]; then
+		plambda $(printf $FLOW $i) \
+		  "x(0,0)[0] x(-1,0)[0] - x(0,0)[1] x(0,-1)[1] - + fabs 0.5 > 255 *" \
+		  -o $file
+	fi
+
 	# run filtering {{{2
-	$NLK -i $(printf $SEQ $i) -s $SIG $PM1 -o $(printf $FLOW $i) \
+	$NLK -i $(printf $SEQ $i) -s $SIG $PM1 -o $(printf $FLOW $i) -k $(printf $OCCL $i)\
 	 --den0 $(printf $DEN2 $((i-1))) --den1 $(printf $DEN1 $i)
 
 	if [[ $PM2 != "no" ]]; then
-	   $NLK -i $(printf $SEQ $i) -s $SIG $PM2 -o $(printf $FLOW $i) \
+	   $NLK -i $(printf $SEQ $i) -s $SIG $PM2 -o $(printf $FLOW $i) -k $(printf $OCCL $i)\
 	    --den0 $(printf $DEN2 $((i-1))) --gui1 $(printf $DEN1 $i) \
 	    --den1 $(printf $DEN2 $i)
 	fi
