@@ -76,10 +76,18 @@ do
 			F10=$(printf "$OUT/ma%d-den1-%03d.tif" $l $((i-1)))
 			F20=$(printf "$OUT/ma%d-den2-%03d.tif" $l $((i-1)))
 			FLW=$(printf "$OUT/ms%d-bflo-%03d.flo" $l $i)
+			OCC=$(printf "$OUT/ms%d-bocc-%03d.png" $l $i)
 
 			# compute backward optical flow {{{2
 			if [ ! -f $FLW ]; then
 				$TVL1 $NSY $F20 $FLW 0 0.25 0.2 $DW 100 $FSCALE 0.5 5 0.01 0;
+			fi
+
+			# backward occlusion masks {{{2
+			if [ ! -f $OCC ]; then
+				plambda $FLW \
+				  "x(0,0)[0] x(-1,0)[0] - x(0,0)[1] x(0,-1)[1] - + fabs 0.5 > 255 *" \
+				  -o $OCC
 			fi
 
 			# run filtering {{{2
