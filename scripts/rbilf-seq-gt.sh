@@ -43,7 +43,7 @@ done
 $DIR/rbilf-seq.sh "$OUT/%03d.tif" $FFR $LFR $SIG $OUT "$PM1" "$PM2" "$OPM"
 
 # reset first frame for psnr computation {{{1
-FFR1=$((FFR+0))
+FFR1=$((FFR+10))
 
 # compute psnr 1 {{{1
 SS=0
@@ -65,12 +65,12 @@ echo "DEN1 - Frame PSNR " ${PP[*]} >> $OUT/measures
 echo "DEN1 - Total RMSE $DRMSE" >> $OUT/measures
 echo "DEN1 - Total PSNR $DPSNR" >> $OUT/measures
 
-# convert tif to png (to save space)
-for i in $(seq $FFR $LFR);
-do
-	ii=$(printf %03d $i)
-	echo "plambda $OUT/den1-${ii}.tif x -o $OUT/den1-${ii}.png && rm $OUT/den1-${ii}.tif"
-done | parallel
+### # convert tif to png (to save space)
+### for i in $(seq $FFR $LFR);
+### do
+### 	ii=$(printf %03d $i)
+### 	echo "plambda $OUT/den1-${ii}.tif x -o $OUT/den1-${ii}.png && rm $OUT/den1-${ii}.tif"
+### done | parallel
 
 if [[ $PM2 == "no" ]]; then
 	printf "%f\n" $DMSE;
@@ -97,12 +97,12 @@ echo "DEN2 - Frame PSNR " ${PP[*]} >> $OUT/measures
 echo "DEN2 - Total RMSE $DRMSE" >> $OUT/measures
 echo "DEN2 - Total PSNR $DPSNR" >> $OUT/measures
 
-# convert tif to png (to save space)
-for i in $(seq $FFR $LFR);
-do
-	ii=$(printf %03d $i)
-	echo "plambda $OUT/den2-${ii}.tif x -o $OUT/den2-${ii}.png && rm $OUT/den2-${ii}.tif"
-done | parallel
+### # convert tif to png (to save space)
+### for i in $(seq $FFR $LFR);
+### do
+### 	ii=$(printf %03d $i)
+### 	echo "plambda $OUT/den2-${ii}.tif x -o $OUT/den2-${ii}.png && rm $OUT/den2-${ii}.tif"
+### done | parallel
 
 printf "%f\n" $DMSE;
 

@@ -1,8 +1,9 @@
-configure_file(rbilf-gt.sh ${CMAKE_BINARY_DIR}/bin/rbilf-gt.sh COPYONLY)
-configure_file(rbilf-seq.sh ${CMAKE_BINARY_DIR}/bin/rbilf-seq.sh COPYONLY)
-configure_file(msrbilf-seq.sh ${CMAKE_BINARY_DIR}/bin/msrbilf-seq.sh COPYONLY)
-configure_file(rbilf-seq-gt.sh ${CMAKE_BINARY_DIR}/bin/rbilf-seq-gt.sh COPYONLY)
-configure_file(msrbilf-seq-gt.sh ${CMAKE_BINARY_DIR}/bin/msrbilf-seq-gt.sh COPYONLY)
-configure_file(rbilf-mp4.sh ${CMAKE_BINARY_DIR}/bin/rbilf-mp4.sh COPYONLY)
+#configure_file(rbilf-gt.sh ${CMAKE_BINARY_DIR}/bin/rbilf-gt.sh COPYONLY)   # outdated
+#configure_file(rbilf-mp4.sh ${CMAKE_BINARY_DIR}/bin/rbilf-mp4.sh COPYONLY) # outdated
 configure_file(psnr.sh ${CMAKE_BINARY_DIR}/bin/psnr.sh COPYONLY)
+configure_file(rbilf-seq.sh ${CMAKE_BINARY_DIR}/bin/rbilf-seq.sh COPYONLY)
+configure_file(rbilf-seq-gt.sh ${CMAKE_BINARY_DIR}/bin/rbilf-seq-gt.sh COPYONLY)
+configure_file(msrbilf-seq.sh ${CMAKE_BINARY_DIR}/bin/msrbilf-seq.sh COPYONLY)
+configure_file(msrbilf-seq-gt.sh ${CMAKE_BINARY_DIR}/bin/msrbilf-seq-gt.sh COPYONLY)
 configure_file(rbilf-train-14.sh ${CMAKE_BINARY_DIR}/bin/rbilf-train-14.sh COPYONLY)
+configure_file(optimize_prms.m ${CMAKE_BINARY_DIR}/bin/optimize_prms.m COPYONLY)
