@@ -22,8 +22,10 @@ function mse = rbilf_train(x)
 	global computing_gradient;
 	if computing_gradient == 0,
       %               hx1   hd1   lx1   ht1   lt1   hx2   hd2   lx2   ht2   lt2 ofw]';
-		disp(sprintf('%7.3f %5.3f %5.3f %7.3f %5.3f %7.3f %5.3f %5.3f %7.3f %5.3f  %6.3f  %9.5f',...
-		             x(1),  x(2), x(3), x(4), x(5), x(6), x(7), x(8), x(9), x(10), x(11), mse));
+		s = sprintf('%7.3f %5.3f %5.3f %7.3f %5.3f %7.3f %5.3f %5.3f %7.3f %5.3f  %6.3f  %9.5f',...
+		             x(1),  x(2), x(3), x(4), x(5), x(6), x(7), x(8), x(9), x(10), x(11), mse);
+		disp(s);
+		fid = fopen('train20/table', 'a'); fprintf(fid, [s '\n']); fclose(fid);
 	end
 
 	return
