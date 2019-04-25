@@ -8,7 +8,7 @@ s=$1
 output=${2:-"trials"}
 
 # training set folder
-sf='/home/pariasm/Remote/lime/denoising/data/train-14/dataset/'
+sf='/home/pariasm/denoising/data/train-14/dataset/'
 
 # test sequences
 seqs=(\
@@ -74,16 +74,17 @@ b1prms+=$(printf -- "--whx %.20f --whd %.20f " $b1_whx $b1_whd)
 b1prms+=$(printf -- "--wthx %.20f --lambdax %.20f " $b1_thx $b1_lambdax) 
 b1prms+=$(printf -- "--wht %.20f --lambdat %.20f -v 0" $b1_wht $b1_lambdat)
 
-b2_whx=$8
-b2_whd=$9
-b2_lambdax=${10}
-b2_wht=${11}
-b2_lambdat=${12}
-
-b2prms= $(printf -- "--whx0 %.20f --whd0 %.20f " $b2_whx0 $b2_whd0)
-b2prms+=$(printf -- "--whx %.20f --whd %.20f " $b2_whx $b2_whd)
-b2prms+=$(printf -- "--wthx %.20f --lambdax %.20f " $b2_thx $b2_lambdax) 
-b2prms+=$(printf -- "--wht %.20f --lambdat %.20f -v 0" $b2_wht $b2_lambdat)
+## b2_whx=$8
+## b2_whd=$9
+## b2_lambdax=${10}
+## b2_wht=${11}
+## b2_lambdat=${12}
+## 
+## b2prms= $(printf -- "--whx0 %.20f --whd0 %.20f " $b2_whx0 $b2_whd0)
+## b2prms+=$(printf -- "--whx %.20f --whd %.20f " $b2_whx $b2_whd)
+## b2prms+=$(printf -- "--wthx %.20f --lambdax %.20f " $b2_thx $b2_lambdax) 
+## b2prms+=$(printf -- "--wht %.20f --lambdat %.20f -v 0" $b2_wht $b2_lambdat)
+b2prms="no"
 
 ## # no multiscale parameters
 ## # the optimization for spatial denoising parameters selected 
@@ -94,7 +95,8 @@ b2prms+=$(printf -- "--wht %.20f --lambdat %.20f -v 0" $b2_wht $b2_lambdat)
 ## ms_rf=$7
 ## mprms=$(printf "%.20f %d" $ms_rf $ms_sc)
 
-f_dw=${13}
+## f_dw=${13}
+f_dw=$8
 fprms=$(printf "%d %.20f" $f_sc $f_dw)
 
 folder="$output/tmp/"
