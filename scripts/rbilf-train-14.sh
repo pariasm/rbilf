@@ -121,5 +121,8 @@ done
 echo $mse
 
 # remove optical flow and occlusion masks, so that they are recomputed
-rm $folder/$seq/*.flo
+for seq in ${seqs[@]}; do
+	rm $folder/$seq/bflo*.flo
+	rm $folder/$seq/bocc*.png
+done
 

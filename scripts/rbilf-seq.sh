@@ -66,7 +66,7 @@ do
 	file=$(printf $OCCL $i)
 	if [ ! -f $file ]; then
 		plambda $(printf $FLOW $i) \
-		  "x(0,0)[0] x(-1,0)[0] - x(0,0)[1] x(0,-1)[1] - + fabs 0.5 > 255 *" \
+		  "x(0,0)[0] x(-1,0)[0] - x(0,0)[1] x(0,-1)[1] - + fabs 0.75 > 255 *" \
 		  -o $file
 	fi
 
