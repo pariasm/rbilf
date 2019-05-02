@@ -77,6 +77,7 @@ void warp_bicubic(float *imw, float *im, float *of, float *msk,
 // set default parameters as a function of sigma
 void rbilf_default_params(struct rbilf_params * p, float sigma, int step)
 {
+#ifdef OLD_PARAMS
 	// the parameters are based on the following parameters
 	// found with a parameter search:
 	//
@@ -88,28 +89,47 @@ void rbilf_default_params(struct rbilf_params * p, float sigma, int step)
 	{
 		if (p->weights_hx0  < 0) p->weights_hx0  = 1.07f * sigma + 66.9;
 		if (p->weights_hd0  < 0) p->weights_hd0  = 0.92;
-		if (p->weights_hx   < 0) p->weights_hx   = 1.2 * sigma;
-		if (p->weights_hd   < 0) p->weights_hd   = 1.6;
-		if (p->search_sz    < 0) p->search_sz    = 3*p->weights_hd;
-		if (p->weights_thx  < 0) p->weights_thx  = .05f;
-		if (p->weights_ht   < 0) p->weights_ht   = 0.7 * sigma;
-		if (p->lambda_t     < 0) p->lambda_t    = 0.5;
-		if (p->lambda_x < 0)
-			p->lambda_x = fmax(0, fmin(0.2, 0.1 - (sigma - 20)/400));
 	}
 	else
 	{
 		if (p->weights_hx0  < 0) p->weights_hx0  = 1.71 * sigma - 7.0;
 		if (p->weights_hd0  < 0) p->weights_hd0  = 0.09 * sigma + 1.7;
-		if (p->weights_hx   < 0) p->weights_hx   = 1.2 * sigma;
-		if (p->weights_hd   < 0) p->weights_hd   = 1.6;
-		if (p->search_sz    < 0) p->search_sz    = 3*p->weights_hd;
-		if (p->weights_thx  < 0) p->weights_thx  = .05f;
-		if (p->weights_ht   < 0) p->weights_ht   = 0.7 * sigma;
-		if (p->lambda_t     < 0) p->lambda_t    = 0.5;
-		if (p->lambda_x < 0)
-			p->lambda_x = fmax(0, fmin(0.2, 0.1 - (sigma - 20)/400));
 	}
+	if (p->weights_hx   < 0) p->weights_hx   = 1.2 * sigma;
+	if (p->weights_hd   < 0) p->weights_hd   = 1.6;
+	if (p->search_sz    < 0) p->search_sz    = 3*p->weights_hd;
+	if (p->weights_thx  < 0) p->weights_thx  = .05f;
+	if (p->weights_ht   < 0) p->weights_ht   = 0.7 * sigma;
+	if (p->lambda_t     < 0) p->lambda_t    = 0.5;
+	if (p->lambda_x < 0)
+		p->lambda_x = fmax(0, fmin(0.2, 0.1 - (sigma - 20)/400));
+#else
+	if (step == 1)
+	{
+		if (p->weights_hx0  < 0) p->weights_hx0  = 110;
+		if (p->weights_hd0  < 0) p->weights_hd0  = 2;
+	}
+	else
+	{
+		if (p->weights_hx0  < 0) p->weights_hx0  = 1.71 * sigma - 7.0;
+		if (p->weights_hd0  < 0) p->weights_hd0  = 0.09 * sigma + 1.7;
+	}
+
+	// 30    | 40     sigma
+	// 22    | 26.5   whx
+	// 1.6   | 1.6    whd
+	// 0.05  | 0.05   lx
+	// 18    | 25     wht
+	// 0.02  | 0.01   lt
+	// 0.2   | 0.2    ofw
+	if (p->weights_hx   < 0) p->weights_hx   = 26.5;
+	if (p->weights_hd   < 0) p->weights_hd   = 1.6;
+	if (p->lambda_x     < 0) p->lambda_x     = .05;
+	if (p->weights_ht   < 0) p->weights_ht   = 25.0;
+	if (p->lambda_t     < 0) p->lambda_t     = .01;
+	if (p->weights_thx  < 0) p->weights_thx  = .05;
+	if (p->search_sz    < 0) p->search_sz    = 3*p->weights_hd;
+#endif
 
 	// limit search region to prevent too long running times
 	p->search_sz = fmin(15, fmin(3*p->weights_hd, p->search_sz));
