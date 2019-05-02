@@ -8,7 +8,7 @@ s=$1
 output=${2:-"trials"}
 
 # training set folder
-sf='/home/pariasm/denoising/data/train-14/dataset/'
+sf='/home/pariasm/denoising/data/train-14/dataset-rgb/'
 
 # test sequences
 seqs=(\
@@ -41,8 +41,10 @@ f_sc=1
 f_dw=0.4
 
 # filter parameters, first step
-b1_whx0=83
-b1_whd0=0.92
+#b1_whx0=83
+#b1_whd0=0.92
+b1_whx0=110 # noise 40, rgb, seed2
+b1_whd0=2  # noise 40, rgb, seed2
 b1_whx=24
 b1_whd=1.6
 b1_wht=14
@@ -69,7 +71,7 @@ b1_lambdax=$5
 b1_wht=$6
 b1_lambdat=$7
 
-b1prms= $(printf -- "--whx0 %.20f --whd0 %.20f " $b1_whx0 $b1_whd0)
+b1prms=$(printf -- "--whx0 %.20f --whd0 %.20f " $b1_whx0 $b1_whd0)
 b1prms+=$(printf -- "--whx %.20f --whd %.20f " $b1_whx $b1_whd)
 b1prms+=$(printf -- "--wthx %.20f --lambdax %.20f " $b1_thx $b1_lambdax) 
 b1prms+=$(printf -- "--wht %.20f --lambdat %.20f -v 0" $b1_wht $b1_lambdat)
@@ -121,8 +123,8 @@ done
 echo $mse
 
 # remove optical flow and occlusion masks, so that they are recomputed
-for seq in ${seqs[@]}; do
-	rm $folder/$seq/bflo*.flo
-	rm $folder/$seq/bocc*.png
-done
+#for seq in ${seqs[@]}; do
+#	rm $folder/$seq/bflo*.flo
+#	rm $folder/$seq/bocc*.png
+#done
 

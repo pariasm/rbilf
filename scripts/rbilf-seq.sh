@@ -55,20 +55,20 @@ do
 
 	# compute backward optical flow {{{2
 	file=$(printf $FLOW $i)
-	if [ ! -f $file ]; then
+#	if [ ! -f $file ]; then
 		$TVL1 $(printf $SEQ $i) \
 		      $(printf $DEN2 $((i-1))) \
 		      $file \
-		      $NPROC 0.25 0.2 $DW 100 $FSCALE 0.5 5 0.01 0;
-	fi
+		      $NPROC 0 $DW 0 0 $FSCALE 0 0 0 0;
+#	fi
 
 	# backward occlusion masks {{{2
 	file=$(printf $OCCL $i)
-	if [ ! -f $file ]; then
+#	if [ ! -f $file ]; then
 		plambda $(printf $FLOW $i) \
 		  "x(0,0)[0] x(-1,0)[0] - x(0,0)[1] x(0,-1)[1] - + fabs 0.75 > 255 *" \
 		  -o $file
-	fi
+#	fi
 
 	# run filtering {{{2
 	$NLK -i $(printf $SEQ $i) -s $SIG $PM1 -o $(printf $FLOW $i) -k $(printf $OCCL $i)\
