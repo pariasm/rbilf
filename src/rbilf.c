@@ -122,13 +122,14 @@ void rbilf_default_params(struct rbilf_params * p, float sigma, int step)
 	// 18    | 25     wht
 	// 0.02  | 0.01   lt
 	// 0.2   | 0.2    ofw
-	if (p->weights_hx   < 0) p->weights_hx   = 26.5;
-	if (p->weights_hd   < 0) p->weights_hd   = 1.6;
+	if (p->weights_hx   < 0) p->weights_hx   = 26.0;
+	if (p->weights_hd   < 0) p->weights_hd   = 1.8;
 	if (p->lambda_x     < 0) p->lambda_x     = .05;
-	if (p->weights_ht   < 0) p->weights_ht   = 25.0;
+	if (p->weights_ht   < 0) p->weights_ht   = 23;
 	if (p->lambda_t     < 0) p->lambda_t     = .01;
 	if (p->weights_thx  < 0) p->weights_thx  = .05;
 	if (p->search_sz    < 0) p->search_sz    = 3*p->weights_hd;
+
 #endif
 
 	// limit search region to prevent too long running times
