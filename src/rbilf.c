@@ -106,8 +106,16 @@ void rbilf_default_params(struct rbilf_params * p, float sigma, int step)
 #else
 	if (step == 1)
 	{
-		if (p->weights_hx0  < 0) p->weights_hx0  = 110;
-		if (p->weights_hd0  < 0) p->weights_hd0  = 2;
+		if (sigma >= 40)
+		{
+			if (p->weights_hx0  < 0) p->weights_hx0  = 110;
+			if (p->weights_hd0  < 0) p->weights_hd0  = 2;
+		}
+		else
+		{
+			if (p->weights_hx0  < 0) p->weights_hx0  = 55;
+			if (p->weights_hd0  < 0) p->weights_hd0  = 1.6;
+		}
 	}
 	else
 	{
@@ -122,13 +130,27 @@ void rbilf_default_params(struct rbilf_params * p, float sigma, int step)
 	// 18    | 25     wht
 	// 0.02  | 0.01   lt
 	// 0.2   | 0.2    ofw
-	if (p->weights_hx   < 0) p->weights_hx   = 26.0;
-	if (p->weights_hd   < 0) p->weights_hd   = 1.8;
-	if (p->lambda_x     < 0) p->lambda_x     = .05;
-	if (p->weights_ht   < 0) p->weights_ht   = 23;
-	if (p->lambda_t     < 0) p->lambda_t     = .01;
-	if (p->weights_thx  < 0) p->weights_thx  = .05;
-	if (p->search_sz    < 0) p->search_sz    = 3*p->weights_hd;
+	if (sigma >= 40) 
+	{
+		if (p->weights_hx   < 0) p->weights_hx   = 26.0;
+		if (p->weights_hd   < 0) p->weights_hd   = 1.8;
+		if (p->lambda_x     < 0) p->lambda_x     = .05;
+		if (p->weights_ht   < 0) p->weights_ht   = 23;
+		if (p->lambda_t     < 0) p->lambda_t     = .01;
+		if (p->weights_thx  < 0) p->weights_thx  = .05;
+		if (p->search_sz    < 0) p->search_sz    = 3*p->weights_hd;
+	}
+	else
+	{
+		if (p->weights_hx   < 0) p->weights_hx   = 18.0;
+		if (p->weights_hd   < 0) p->weights_hd   = 1.2;
+		if (p->lambda_x     < 0) p->lambda_x     = .05;
+		if (p->weights_ht   < 0) p->weights_ht   = 17;
+		if (p->lambda_t     < 0) p->lambda_t     = .03;
+		if (p->weights_thx  < 0) p->weights_thx  = .05;
+		if (p->search_sz    < 0) p->search_sz    = 3*p->weights_hd;
+	}
+
 
 #endif
 
