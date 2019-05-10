@@ -5,7 +5,7 @@
 s=$1
 
 # optical flow parameters
-f_dw=$2   # data attachment weight
+f_dw=$3   # data attachment weight
 f_sc=1    # finest scale (this parameter is fixed)
 
 # output folder
