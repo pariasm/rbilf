@@ -571,7 +571,7 @@ void brox_optic_flow (
 			std::cout << "Scale: " << s << std::endl;
 
 		//compute the optical flow for the current scale
-		if (s > fscale)
+		if (s >= fscale)
 			brox_optic_flow (I1s[s], I2s[s], us[s], vs[s], nx[s], ny[s],
 				alpha, gamma, TOL, inner_iter, outer_iter, number_of_threads, verbose);
 

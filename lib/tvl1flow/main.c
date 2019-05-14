@@ -63,6 +63,7 @@ static float *read_image(const char *filename, int *w, int *h)
  *   -lambda      data term weight parameter
  *   -theta       tightness parameter
  *   -nscales     number of scales in the pyramidal structure
+ *   -fscale      finest scale on the pyramid
  *   -zfactor     downsampling factor for creating the scales
  *   -nwarps      number of warps per scales
  *   -epsilon     stopping criterion threshold for the iterative process
@@ -124,6 +125,16 @@ int main(int argc, char *argv[])
 		if (verbose) fprintf(stderr, "warning: "
 				"nscales changed to %d\n", nscales);
 	}
+	if (fscale <= 0) {
+		fscale = PAR_DEFAULT_FSCALE;
+		if (verbose) fprintf(stderr, "warning: "
+				"fscale changed to %d\n", fscale);
+	}
+	if (fscale > nscales) {
+		fscale = nscales;
+		if (verbose) fprintf(stderr, "warning: "
+				"fscale changed to %d\n", fscale);
+	}
 	if (zfactor <= 0 || zfactor >= 1) {
 		zfactor = PAR_DEFAULT_ZFACTOR;
 		if (verbose) fprintf(stderr, "warning: "
@@ -159,8 +170,6 @@ int main(int argc, char *argv[])
 		const float N = 1 + log(hypot(nx, ny)/16.0) / log(1/zfactor);
 		if (N < nscales)
 			nscales = N;
-		if (nscales < fscale)
-			fscale = nscales;
 
 		if (verbose)
 			fprintf(stderr,
