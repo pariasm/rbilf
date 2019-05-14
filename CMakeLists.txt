@@ -27,8 +27,10 @@ endif()
 # add project directories #####################################################
 
 add_subdirectory(lib/iio)      # image i/o
+add_subdirectory(lib/phs_3)    # pyramidal horn schunck flow
 add_subdirectory(lib/tvl1flow) # tvl1 optical flow
-add_subdirectory(lib/rdpof)    # rfp optical flow
+add_subdirectory(lib/rof)      # robust optical flow
+add_subdirectory(lib/rdpof)    # robust discontinuity preserving optical flow
 add_subdirectory(lib/argparse) # command line parsing
 add_subdirectory(lib/multiscale) # multiscaler
 add_subdirectory(src)
