@@ -48,24 +48,20 @@ OFBIN="$DIR/${O[0]}"
 
 case ${O[0]} in
 	"tvl1flow")
-		echo tvl1 $OFBIN
 		FSCALE=${O[1]}; DW=${O[2]}; NPROC=2;
 		OFPRMS="$NPROC 0 $DW 0 0 $FSCALE";;
 		# nproc tau lambda theta nscales fscale zfactor nwarps epsilon verbos
 	"phsflow")
-		echo phs $OFBIN
 		FSCALE=${O[1]}; ALPHA=${O[2]}; NPROC=2;
 		OFPRMS="$NPROC $ALPHA 0 $FSCALE";;
 		# nproc alpha nscales fscale zfactor nwarps TOL maxiter verbose
 	"rof")
-		echo rof! $OFBIN
 		FSCALE=${O[1]}; ALPHA=${O[2]}; GAMMA=${O[3]}; NPROC=2;
 		OFPRMS="$NPROC $ALPHA $GAMMA 10 $FSCALE 0.5 1e-4 1 8";;
 		# nproc alpha gamma nscales fscale zfactor TOL inner_iter outer_iter verbose
 	"rdpof")
-		echo rdpof! $OFBIN
-		FSCALE=${O[1]}; ALPHA=${O[2]}; GAMMA=${O[3]}; DELTA=${O[4]}; NPROC=2;
-		OFPRMS="$NPROC 3 $ALPHA $GAMMA $DELTA 10 $FSCALE 0.5 1e-4 1 8";;
+		FSCALE=${O[1]}; ALPHA=${O[2]}; GAMMA=${O[3]}; NPROC=2;
+		OFPRMS="$NPROC 3 $ALPHA $GAMMA 0 10 $FSCALE 0.5 1e-4 1 8";;
 		# nproc method alpha gamma lambda nscales fscale zfactor TOL i_iter o_iter verbose
 	* )
 		echo ERROR: unknown optical flow $OFBIN

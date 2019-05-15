@@ -1,15 +1,15 @@
 % optimize parameters of denoising algorithm using octave sqp
 
 % start from another initial condition
-global hx1=22.3;
-global hd1=1.6;
+global hx1=17.1;
+global hd1=1.1;
 global lx1=0.05;
-global ht1=17;
+global ht1=23;
 global lt1=0.01;
 global ofw=0.2;
 x0 = [hx1, hd1, lx1, ht1, lt1, ofw]';
 
-global sigma = 30;
+global sigma = 10;
 global out_folder = sprintf('train%d-rgb-step1', sigma);
 global table_file = 'table';
 
@@ -118,19 +118,27 @@ endfunction
 %ofw=0.219;
 %hx1=23.953; hd1=0.923; lx1=0.050; ht1=20.000; lt1=0.000;
 %ofw=0.242;
-%hx1=26.5; hd1=1.6; lx1=0.050; ht1=27.000; lt1=0.000;
-%ofw=0.210;
-hx1=22.3; hd1=1.6; lx1=0.050; ht1=17.000; lt1=0.010;
-ofw=0.200;
+%hx1=25.6; hd1=1.9; lx1=0.050; ht1=23.000; lt1=0.010;
+%ofw=0.200;
+%hx1=22.3; hd1=1.6; lx1=0.050; ht1=17.000; lt1=0.010;
+%ofw=0.200;
+hx1=14.0; hd1=0.7; lx1=0.120; ht1=5.000; lt1=0.040;
+ofw=0.4;
 x0 = [hx1, hd1, lx1, ht1, lt1, ofw]';
 
 %rbilf_train(x0)';
 %rbilf_train_grad(x0)'
 
 % line searches
-table_file = 'ls_lx1'; vs = [0.0:.02:0.2];  x = x0; for v = vs, x(3) = v; rbilf_train(x); end
-table_file = 'ls_lt1'; vs = [0:.01:0.1];    x = x0; for v = vs, x(5) = v; rbilf_train(x); end
-table_file = 'ls_ofw'; vs = [0.05:.05:0.4]; x = x0; for v = vs, x(6) = v; rbilf_train(x); end
-table_file = 'ls_hx1'; vs = [20:.2:24];     x = x0; for v = vs, x(1) = v; rbilf_train(x); end
-table_file = 'ls_hd1'; vs = [0.6:.2:2.6];   x = x0; for v = vs, x(2) = v; rbilf_train(x); end
-table_file = 'ls_ht1'; vs = [ 7:.5:27];     x = x0; for v = vs, x(4) = v; rbilf_train(x); end
+%table_file = 'ls_lx1_flow-to-deno'; vs = [0.12:.02:0.2]; x = x0; for v = vs, x(3) = v; rbilf_train(x); end
+%table_file = 'ls_lt1_flow-to-deno'; vs = [0.07:.02:2.0]; x = x0; for v = vs, x(5) = v; rbilf_train(x); end
+%table_file = 'ls_ofw_flow-to-deno'; vs = [0.45:.1:0.8];  x = x0; for v = vs, x(6) = v; rbilf_train(x); end
+%table_file = 'ls_hx1_flow-to-deno'; vs = [07:.5:15];    x = x0; for v = vs, x(1) = v; rbilf_train(x); end
+%table_file = 'ls_hd1_flow-to-deno'; vs = [0.3:.2:2.1];   x = x0; for v = vs, x(2) = v; rbilf_train(x); end
+%table_file = 'ls_ht1_flow-to-deno'; vs = [8:1:16];      x = x0; for v = vs, x(4) = v; rbilf_train(x); end
+
+% 2D search
+table_file = 'ps_hx1_hd1-ht15-5';
+v1s = [6.5:.5:10.0];
+v2s = [3.1:.1:5.0]; x = x0;
+for v1=v1s, for v2=v2s, x(1)=v1; x(2)=v2; rbilf_train(x); end; end
