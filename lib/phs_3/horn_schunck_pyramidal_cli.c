@@ -68,6 +68,7 @@ static int read_image(
  *   -processors  number of threads used with the OpenMP library
  *   -alpha       smoothing parameter
  *   -nscales     number of scales for the pyramidal approach
+ *   -fscale      number of scales for the pyramidal approach
  *   -zoom_factor reduction factor for creating the scales
  *   -nwarps      number of warps per scales
  *   -TOL         stopping criterion threshold for the iterative process
@@ -80,7 +81,7 @@ int main(int argc, char *argv[])
 	if(argc < 3) {
 		fprintf(stderr, "Usage: %s"
 				" I1 I2 [out_file processors"
-				" alpha nscales zoom_factor"
+				" alpha nscales fscale zoom_factor"
 				" nwarps TOL maxiter verbose]\n", *argv);
 		return EXIT_FAILURE;
 	}
