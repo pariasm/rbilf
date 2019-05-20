@@ -51,14 +51,14 @@ for seq in ${seqs[@]}; do
 #		\"$b2prms\" \"$ofprms\" \"$mprms\" > $folder/${seq}-out"
 done | parallel
 
-## # compute MSE by averaging the mse of each sequence
-## mse=0
-## nseqs=${#seqs[@]}
-## for seq in ${seqs[@]}; do
-## 	out=$(cat $folder/${seq}-out)
-## 	mse=$(echo "$mse + $out/$nseqs" | bc -l)
-## done
-## echo $mse
+# compute MSE by averaging the mse of each sequence
+mse=0
+nseqs=${#seqs[@]}
+for seq in ${seqs[@]}; do
+	out=$(cat $folder/${seq}-out)
+	mse=$(echo "$mse + $out/$nseqs" | bc -l)
+done
+echo $mse
 
 # remove optical flow and occlusion masks, so that they are recomputed
 #for seq in ${seqs[@]}; do
