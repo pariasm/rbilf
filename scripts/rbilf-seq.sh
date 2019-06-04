@@ -46,21 +46,22 @@ fi
 read -ra O <<< "$OPM"
 OFBIN="$DIR/${O[0]}"
 
+NPROC=2
 case ${O[0]} in
 	"tvl1flow")
-		FSCALE=${O[1]}; DW=${O[2]}; NPROC=2;
+		FSCALE=${O[1]}; DW=${O[2]};
 		OFPRMS="$NPROC 0 $DW 0 0 $FSCALE";;
 		# nproc tau lambda theta nscales fscale zfactor nwarps epsilon verbos
 	"phsflow")
-		FSCALE=${O[1]}; ALPHA=${O[2]}; NPROC=2;
+		FSCALE=${O[1]}; ALPHA=${O[2]};
 		OFPRMS="$NPROC $ALPHA 0 $FSCALE";;
 		# nproc alpha nscales fscale zfactor nwarps TOL maxiter verbose
 	"rof")
-		FSCALE=${O[1]}; ALPHA=${O[2]}; GAMMA=${O[3]}; NPROC=2;
+		FSCALE=${O[1]}; ALPHA=${O[2]}; GAMMA=${O[3]};
 		OFPRMS="$NPROC $ALPHA $GAMMA 10 $FSCALE 0.5 1e-4 1 8";;
 		# nproc alpha gamma nscales fscale zfactor TOL inner_iter outer_iter verbose
 	"rdpof")
-		FSCALE=${O[1]}; ALPHA=${O[2]}; GAMMA=${O[3]}; NPROC=2;
+		FSCALE=${O[1]}; ALPHA=${O[2]}; GAMMA=${O[3]};
 		OFPRMS="$NPROC 3 $ALPHA $GAMMA 0 10 $FSCALE 0.5 1e-4 1 8";;
 		# nproc method alpha gamma lambda nscales fscale zfactor TOL i_iter o_iter verbose
 	* )
