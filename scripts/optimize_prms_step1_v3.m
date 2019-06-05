@@ -1,17 +1,19 @@
 % optimize parameters of denoising algorithm using octave sqp
 
 % initial condition
-global hx1=18;   % 18   ; 22.0  ; 26.5 ;
-global hd1=1.2;  % 1.2  ; 1.6   ; 1.6  ;
-global lx1=0.05; % 0.05 ; 0.05  ; 0.05 ;
-global ht1=17;   % 17   ; 17.5  ; 25   ;
-global lt1=0.04; % 0.03 ; 0.02  ; 0.01 ;
-global ofw=0.3;  % 0.25 ; 0.225 ; 0.2  ;
-x0 = [hx1, hd1, lx1, ht1, lt1, ofw]';
+global hx1=17.995;% 18   ; 22.0  ; 26.5 ;
+global hd1=2.571; % 1.2  ; 1.6   ; 1.6  ;
+global lx1=0.109; % 0.05 ; 0.05  ; 0.05 ;
+global ht1=16.978;% 17   ; 17.5  ; 25   ;
+global lt1=0.077;  % 0.03 ; 0.02  ; 0.01 ;
+global ofw=0.326; % 0.25 ; 0.225 ; 0.2  ;
 
-global sigma = 15;
-global out_folder = sprintf('train%d-rgb-step1',sigma);
-global table_file = 'bfgs-hx1-hd1-ht1-flow-to-deno-seed3';
+x0 = [hx1, hd1, lx1, ht1, lt1, ofw]';
+global of_scale = 1;
+
+global sigma = 20;
+global out_folder = sprintf('train%d-step1-tvl1',sigma);
+global table_file = 'bfgs-hd1-lx1-lt1';
 
 % cache to avoid duplicate computations
 global cache_grad = zeros(size(x0));
@@ -26,12 +28,12 @@ function mse = rbilf_train(x, mode)
 	global out_folder;
 
 	% load fixed parameters
-% 	global hx1; x(1) = hx1;
+ 	global hx1; x(1) = hx1;
 % 	global hd1; x(2) = hd1;
-	global lx1; x(3) = lx1;
-% 	global ht1; x(4) = ht1;
-	global lt1; x(5) = lt1;
-%	global ofw; x(6) = ofw;
+%	global lx1; x(3) = lx1;
+ 	global ht1; x(4) = ht1;
+%	global lt1; x(5) = lt1;
+	global ofw; x(6) = ofw;
 
 	% check cached function
 	global cache_fun_at;
@@ -42,8 +44,15 @@ function mse = rbilf_train(x, mode)
 		saved = 'saved';
 	else
 		global sigma;
-		args = sprintf('%.20f %.20f %.20f %.20f %.20f %.20f', x(1), x(2), x(3), x(4),x(5), x(6));
-		cmd = sprintf('bin/rbilf-train-14.sh %f %s %s 2> stderr.log', sigma, out_folder, args);
+		% rbilf options string
+		rbprms = sprintf('"--whx %.20f --whd %.20f --lambdax %.20f', x(1), x(2), x(3));
+		rbprms = sprintf('%s --wht %.20f --lambdat %.20f -v 0"', rbprms, x(4), x(5));
+
+		% tvl1 options
+		global of_scale;
+		ofprms = sprintf('"tvl1flow %d %.20f"', of_scale, x(6));
+
+		cmd = sprintf('bin/rbilf-train-14.sh %f %s %s %s 2> stderr.log', sigma, out_folder, rbprms, ofprms);
 		[~, mse] = system(cmd);
 		mse = str2num(mse);
 		saved = 'compu';
