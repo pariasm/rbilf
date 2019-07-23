@@ -1,30 +1,30 @@
 % optimize parameters of denoising algorithm using octave sqp
 
 % initial condition
-global hx1=17.83;
-global hd1=1.544;
-global lx1=0.104;
-global ht1=15.27;
-global lt1=0.045;
-global of1=9.245;
-global of2=1.100;
-
-% global hx1=26;
-% global hd1=1.8;
-% global lx1=0.05;
-% global ht1=23;
-% global lt1=0.01;
-% global of1=8;
-% global of2=1;
+%global hx1=18;
+%global hd1=1.2;
+%global lx1=0.05;
+%global ht1=17;
+%global lt1=0.03;
+%global of1=9;
+%global of2=1;
+global hx1=26;
+global hd1=1.8;
+global lx1=0.04;
+global ht1=23;
+global lt1=0.01;
+global of1=14;
+global of2=2;
 global of_scale = 1;
 x0 = [hx1, hd1, lx1, ht1, lt1, of1, of2]';
 
-global sigma = 20;
+global sigma = 40;
 global out_folder = sprintf('train%d-rgb-step1-rof',sigma);
-%global table_file = 'bfgs-hx1-ht1';
+global table_file = 'bfgs-hx1-of';
 %global table_file = 'bfgs-hd1-lx1-lt1';
 %global table_file = 'bfgs-of1-of2';
-global table_file = 'bfgs-all';
+%global table_file = 'bfgs-all';
+%global table_file = 'seed';
 
 % cache to avoid duplicate computations
 global cache_grad = zeros(size(x0));
@@ -118,7 +118,7 @@ endfunction
 %rbilf_train_grad(x0)'
 
 %% minimize -----------------------------------------------------------------------------
-if 1,
+if 0,
 	% bounds
 	%   [hx1   , hd1, lx1,    ht1, lt1,        ofw]';
 	b = [0     ,   0,   0,      0,   0,   0  ,   0]';
@@ -131,21 +131,21 @@ if 1,
 else
 	% initial condition
 	% rof-scale 0 % rof-scale 1
-	hx1=18.73;    % hx1=17.83;
-	hd1=1.543;    % hd1=1.530;
-	lx1=0.107;    % lx1=0.113;
-	ht1=16.36;    % ht1=16.87;
-	lt1=0.097;    % lt1=0.054;
-	of1=7.787;    % of1=9.042;
-	of2=1.372;    % of2=0.704;
+	hx1=26.009;    % hx1=17.83;
+	hd1=1.804;    % hd1=1.530;
+	lx1=0.045;    % lx1=0.113;
+	ht1=22.994    % ht1=16.87;
+	lt1=0.009;    % lt1=0.054;
+	of1=13.997;    % of1=9.042;
+	of2=1.999;    % of2=0.704;
 	
 	% line searches
 	x0 = [hx1, hd1, lx1, ht1, lt1, of1, of2]';
-	table_file = 'ls_hx1'; vs = unique(max(0, hx1 +   4*[-1:.2:1])); x = x0; for v = vs, x(1) = v; rbilf_train(x); end
+%	table_file = 'ls_hx1'; vs = unique(max(0, hx1 +   4*[-1:.2:1])); x = x0; for v = vs, x(1) = v; rbilf_train(x); end
 	table_file = 'ls_hd1'; vs = unique(max(0, hd1 + 1.2*[-1:.2:1])); x = x0; for v = vs, x(2) = v; rbilf_train(x); end
 	table_file = 'ls_lx1'; vs = unique(max(0, lx1 + .05*[-1:.2:1])); x = x0; for v = vs, x(3) = v; rbilf_train(x); end
 	table_file = 'ls_ht1'; vs = unique(max(0, ht1 +   4*[-1:.2:1])); x = x0; for v = vs, x(4) = v; rbilf_train(x); end
 	table_file = 'ls_lt1'; vs = unique(max(0, lt1 + .05*[-1:.2:1])); x = x0; for v = vs, x(5) = v; rbilf_train(x); end
-	table_file = 'ls_of1'; vs = unique(max(0, of1 +   4*[-1:.2:1])); x = x0; for v = vs, x(6) = v; rbilf_train(x); end
-	table_file = 'ls_of2'; vs = unique(max(0, of2 +   4*[-1:.2:1])); x = x0; for v = vs, x(7) = v; rbilf_train(x); end
+%	table_file = 'ls_of1'; vs = unique(max(0, of1 +   4*[-1:.2:1])); x = x0; for v = vs, x(6) = v; rbilf_train(x); end
+%	table_file = 'ls_of2'; vs = unique(max(0, of2 +   4*[-1:.2:1])); x = x0; for v = vs, x(7) = v; rbilf_train(x); end
 end

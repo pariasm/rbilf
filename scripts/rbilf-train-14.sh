@@ -11,6 +11,7 @@ ofprms=${4:-"tvl1flow 1 0.4"} # optical flow parameters (see bin/rbilf-seq.sh)
 
 # path to training sequences
 sf='/home/pariasm/denoising/data/train-14/dataset-rgb/'
+#sf='/home/pariasm/denoising/data/train-14/dataset/'
 
 # list of training sequences
 seqs=(\
