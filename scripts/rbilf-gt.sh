@@ -49,9 +49,9 @@ do
 	if [ ! -f $file ]
 	then
 		$TVL1 $(printf $OUT"/n%04d.tif" $i) \
-				$(printf $OUT"/n%04d.tif" $((i-1))) \
-				$file \
-				$NPROC 0.25 0.2 $DW 100 $FSCALE 0.5 5 0.01 0; 
+		      $(printf $OUT"/n%04d.tif" $((i-1))) \
+		      $file \
+		      $NPROC 0.25 0.2 $DW 100 $FSCALE 0.5 5 0.01 0;
 	fi
 done
 cp $(printf $OUT"/%04d_b.flo" $((FFR+1))) $(printf $OUT"/%04d_b.flo" $FFR)
