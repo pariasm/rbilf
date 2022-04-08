@@ -11,7 +11,7 @@ Implementation of a recursive version of the bilateral filter for video denoisin
 Building
 --------
 
-Building has been tested on Ubuntu Unix 16.04.
+Building has been tested on Ubuntu Linux 16.04.
 
 Dependencies:
  * libtiff, libpng, libjpeg
